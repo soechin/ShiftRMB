@@ -69,10 +69,9 @@ namespace ShiftRMB
                     wScan = (short)User32.MapVirtualKey(0x10/*VK_SHIFT*/, 0/*MAPVK_VK_TO_VSC*/),
                 });
 
-                User32.SendInput(new User32.KEYBDINPUT
+                User32.SendInput(new User32.MOUSEINPUT
                 {
-                    wVk = 0x02/*VK_RBUTTON*/,
-                    wScan = (short)User32.MapVirtualKey(0x02/*VK_RBUTTON*/, 0/*MAPVK_VK_TO_VSC*/),
+                    dwFlags = 0x02/*MOUSEEVENTF_LEFTDOWN*/,
                 });
             }
         }
