@@ -46,13 +46,16 @@ namespace ShiftRMB
 
         #region Native Methods
         [DllImport("user32.dll")]
-        private static extern int SendInput(int nInputs, INPUT[] pInputs, int cbSize);
-
-        [DllImport("user32.dll")]
         public static extern short GetAsyncKeyState(int vKey);
 
         [DllImport("user32.dll")]
+        public static extern short GetKeyState(int vKey);
+
+        [DllImport("user32.dll")]
         public static extern int MapVirtualKey(int uCode, int uMapType);
+
+        [DllImport("user32.dll")]
+        private static extern int SendInput(int nInputs, INPUT[] pInputs, int cbSize);
         #endregion
 
         public static int SendInput(MOUSEINPUT mi)

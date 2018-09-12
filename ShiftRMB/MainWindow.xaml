@@ -14,6 +14,10 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock x:Name="MyTextBlock" />
+        <TextBlock
+            x:Name="MyTextBlock"
+            Width="180"
+            Text="[Scroll Lock]"
+            TextAlignment="Center" />
     </Grid>
 </Window>

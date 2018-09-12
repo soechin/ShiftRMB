@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -22,7 +21,6 @@ namespace ShiftRMB
     {
         Winmm.TIMECALLBACK m_func;
         int m_timer;
-        bool m_pressed;
 
         public MainWindow()
         {
@@ -33,7 +31,6 @@ namespace ShiftRMB
         {
             m_func = new Winmm.TIMECALLBACK(Timer_Elapsed);
             m_timer = Winmm.timeSetEvent(100, 1, m_func, IntPtr.Zero, 1/*TIME_PERIODIC*/);
-            m_pressed = false;
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -43,36 +40,58 @@ namespace ShiftRMB
 
         private void Timer_Elapsed(int uTimerID, int uMsg, IntPtr dwUser, IntPtr dw1, IntPtr dw2)
         {
-            short ks = User32.GetAsyncKeyState(0xA5/*VK_RMENU*/);
-
-            if ((ks & 0x0001) != 0)
+            if ((User32.GetAsyncKeyState(0x91/*VK_SCROLL*/) & 0x0001) != 0)
             {
-                m_pressed = true;
-
-                Dispatcher.BeginInvoke(new Action(() =>
+                if ((User32.GetKeyState(0x91/*VK_SCROLL*/) & 0x0001) != 0)
                 {
-                    MyTextBlock.Text = "Key Down";
-                }));
-            }
-            else if ((ks & 0x8000) == 0 && m_pressed)
-            {
-                m_pressed = false;
+                    if ((User32.GetAsyncKeyState(0x10/*VK_SHIFT*/) & 0x8000) == 0)
+                    {
+                        User32.SendInput(new User32.KEYBDINPUT
+                        {
+                            wVk = 0x10/*VK_SHIFT*/,
+                            wScan = (short)User32.MapVirtualKey(0x10/*VK_SHIFT*/, 0/*MAPVK_VK_TO_VSC*/),
+                            dwFlags = 0/*KEYEVENTF_KEYDOWN*/,
+                        });
+                    }
 
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    MyTextBlock.Text = "Key Up";
-                }));
+                    if ((User32.GetAsyncKeyState(0x02/*VK_RBUTTON*/) & 0x8000) == 0)
+                    {
+                        User32.SendInput(new User32.MOUSEINPUT
+                        {
+                            dwFlags = 0x08/*MOUSEEVENTF_RIGHTDOWN*/,
+                        });
+                    }
 
-                User32.SendInput(new User32.KEYBDINPUT
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MyTextBlock.Text = "[Scroll Lock] enabled";
+                    }));
+                }
+                else
                 {
-                    wVk = 0x10/*VK_SHIFT*/,
-                    wScan = (short)User32.MapVirtualKey(0x10/*VK_SHIFT*/, 0/*MAPVK_VK_TO_VSC*/),
-                });
+                    if ((User32.GetAsyncKeyState(0x10/*VK_SHIFT*/) & 0x8000) != 0)
+                    {
+                        User32.SendInput(new User32.KEYBDINPUT
+                        {
+                            wVk = 0x10/*VK_SHIFT*/,
+                            wScan = (short)User32.MapVirtualKey(0x10/*VK_SHIFT*/, 0/*MAPVK_VK_TO_VSC*/),
+                            dwFlags = 0x02/*KEYEVENTF_KEYUP*/,
+                        });
+                    }
 
-                User32.SendInput(new User32.MOUSEINPUT
-                {
-                    dwFlags = 0x02/*MOUSEEVENTF_LEFTDOWN*/,
-                });
+                    if ((User32.GetAsyncKeyState(0x02/*VK_RBUTTON*/) & 0x8000) != 0)
+                    {
+                        User32.SendInput(new User32.MOUSEINPUT
+                        {
+                            dwFlags = 0x10/*MOUSEEVENTF_RIGHTUP*/,
+                        });
+                    }
+
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MyTextBlock.Text = "[Scroll Lock] disabled";
+                    }));
+                }
             }
         }
     }
